@@ -1,4 +1,4 @@
-module.exports = function filterOBJECT(obj, ...allowedFields) {
+module.exports = function filterObjectj(obj, ...allowedFields) {
 	const newObj = {};
 	Object.keys(obj).forEach((key) => {
 		if (allowedFields.includes(key)) newObj[key] = obj[key];

@@ -8,9 +8,20 @@ const filterObject = require('../utils/filterObject');
 const { promisify } = require('util');
 
 function signToken(userId) {
-	jwt.sign({ userId }, process.env.JWT_SECRET);
+	return jwt.sign({ userId }, process.env.JWT_SECRET);
 }
 
+async function getFilteredUser(email) {
+	return await User.findOne({ email }, [
+		'fullName',
+		'level',
+		'likes',
+		'adsDonated',
+		'country',
+		'totalDonated',
+		'phoneNumber',
+	]);
+}
 async function protect(req, res, next) {
 	let token;
 
@@ -47,6 +58,27 @@ async function protect(req, res, next) {
 	next();
 }
 
+async function verifyUser(req, res) {
+	let token;
+
+	if (!req.headers.cookie) return;
+	token = req.headers.cookie.replace('jwt=', '');
+	const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+	const user = await User.findById(decoded.userId);
+	if (!user) {
+		return res
+			.status(400)
+			.json({ status: 'error', message: `The user doesn't exist` });
+	}
+
+	const filteredUser = await getFilteredUser(user.email);
+	return res.status(200).json({
+		status: 'status',
+		message: 'Welcome back!',
+		user: filteredUser,
+	});
+}
+
 async function sendOTP(req, res) {
 	const { userId } = req;
 	const newOTP = otpGenerator.generate(6, {
@@ -55,19 +87,19 @@ async function sendOTP(req, res) {
 		specialChars: false,
 	});
 
-	const otpExipreTime = Date.now() + 10 * 60 * 1000; // 10 Minutes;
-	const user = await User.findByIdAndUpdate(
-		userId,
-		{
-			otp: newOTP,
-			otpExipreTime,
-		},
-		{ new: true },
-	);
+	const otpExpiryTime = Date.now() + 10 * 60 * 1000; // 10 Mins after otp is sent
 
-	maailer.sendEmailVerificationOTP(user);
+	const user = await User.findByIdAndUpdate(userId, {
+		otpExpiryTime,
+	});
 
-	res.status(200).json({
+	user.otp = newOTP.toString();
+
+	await user.save({ new: true, validateModifiedOnly: true });
+
+	maailer.sendEmailVerificationOTP(user, newOTP);
+
+	return res.status(200).json({
 		status: 'success',
 		message: 'OTP Sent successfully to your email. Please confirm it.',
 	});
@@ -76,7 +108,7 @@ async function verifyOTP(req, res, next) {
 	const { email, otp } = req.body;
 	const user = await User.findOne({
 		email,
-		otpExipreTime: { $gt: Date.now() },
+		otpExpiryTime: { $gt: Date.now() },
 	});
 
 	if (!user) {
@@ -85,7 +117,6 @@ async function verifyOTP(req, res, next) {
 			message: 'Email is invalid or OTP exipred.',
 		});
 	}
-
 	if (!(await user.correctOTP(otp, user.otp))) {
 		return res
 			.status(400)
@@ -98,8 +129,7 @@ async function verifyOTP(req, res, next) {
 	await user.save({ new: true, validateModifiedOnly: true });
 
 	const token = signToken(user._id);
-
-	res.status(200).json({
+	return res.status(200).json({
 		status: 'success',
 		message: 'OTP Verified successfully, welcome!',
 		token,
@@ -149,9 +179,10 @@ async function register(req, res, next) {
 	const existingUser = await User.findOne({ email });
 
 	if (!existingUser) {
-		const newUser = await User.create(filteredBody);
-		req.user = newUser._id;
-		await sendOTP(req, res, next);
+		const newUser = await new User(filteredBody);
+		await newUser.save();
+
+		req.userId = newUser._id;
 		next();
 	}
 	if (existingUser && existingUser.verified) {
@@ -168,7 +199,6 @@ async function register(req, res, next) {
 		});
 
 		req.userId = existingUser._id;
-		await sendOTP(req, res, next);
 		next();
 	}
 }
@@ -191,11 +221,21 @@ async function login(req, res, next) {
 		});
 	}
 
-	const token = signToken(user._id);
+	const token = await signToken(user._id);
+	const filteredUser = await getFilteredUser(user.email);
 
-	res
-		.status(200)
-		.json({ status: 'success', message: 'Logged in successfully!', token });
+	res.cookie('jwt', token, {
+		maxAge: 900000,
+		httpOnly: true,
+		secure: true,
+	});
+
+	res.status(200).json({
+		status: 'success',
+		message: 'Logged in successfully!',
+		token,
+		user: filteredUser,
+	});
 }
 
 async function forgotPassword() {
@@ -220,7 +260,7 @@ async function forgotPassword() {
 	try {
 		// Todo Send Email with reset url
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			message: 'Reset passowrd link sent to email address. ',
 		});
@@ -263,7 +303,7 @@ async function resetPassword() {
 
 		const token = signToken(user._id);
 		// Todo send email informin password change
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			message: 'New password saved successfully, welcome!',
 			token,
@@ -279,4 +319,5 @@ module.exports = {
 	resetPassword,
 	login,
 	protect,
+	verifyUser,
 };

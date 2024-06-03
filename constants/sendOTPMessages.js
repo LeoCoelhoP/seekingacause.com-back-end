@@ -3,7 +3,8 @@ const sendOTPMessages = {
 	success: `Email successfully sent! Please verify it to end the registering process.`,
 	mailFrom: process.env.EMAIL,
 	mailSubject: `Registration Link - SeekingACause.com`,
-	html(user) {
+
+	html(user, otp) {
 		return `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -261,9 +262,7 @@ table, td { color: #000000; } #u_body a { color: #0000ee; text-decoration: under
   <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
 <div class="v-text-align" align="center">
   <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://unlayer.com" style="height:57px; v-text-anchor:middle; width:260px;" arcsize="77%"  stroke="f" fillcolor="#33428d"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
-    <a href=${
-			process.env.BASE_URL + 'verify-otp/' + `code?=${user.otp}`
-		} target="_blank" class="v-button v-font-size" style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #99f5ff; border-radius: 44px;-webkit-border-radius: 44px; -moz-border-radius: 44px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
+    <a href=${`${process.env.BASE_URL}verify-otp/code?=${otp}&email=${user.email}`} target="_blank" class="v-button v-font-size" style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #99f5ff; border-radius: 44px;-webkit-border-radius: 44px; -moz-border-radius: 44px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
       <span style="display:block;padding:20px 70px;line-height:120%;"><strong><span style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 16.8px;">V E R I F Y&nbsp; &nbsp;N O W</span></strong></span>
     </a>
     <!--[if mso]></center></v:roundrect><![endif]-->

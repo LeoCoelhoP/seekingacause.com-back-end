@@ -24,7 +24,7 @@ app.use(
 
 app.use(
 	cors({
-		origin: '*',
+		origin: 'http://localhost:5173',
 		methods: ['GET', 'POST', 'PATCH'],
 		credentials: true,
 	}),
@@ -44,7 +44,7 @@ const limiter = rateLimit({
 	message: 'Too many requests from this IP´, please try again in an hour.',
 });
 
-app.use('/', limiter);
+// app.use('/', limiter);
 
 app.use(routes);
 
