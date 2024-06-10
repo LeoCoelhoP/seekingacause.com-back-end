@@ -6,37 +6,20 @@ const maailer = require('../services/mailer');
 const User = require('../models/User');
 const filterObject = require('../utils/filterObject');
 const { promisify } = require('util');
+const getFilteredUser = require('../utils/getFilteredUser');
 
 function signToken(userId) {
 	return jwt.sign({ userId }, process.env.JWT_SECRET);
 }
 
-async function getFilteredUser(email) {
-	return await User.findOne({ email }, [
-		'fullName',
-		'level',
-		'likes',
-		'adsDonated',
-		'country',
-		'totalDonated',
-		'phoneNumber',
-	]);
-}
 async function protect(req, res, next) {
-	let token;
-
-	if (
-		req.headers.authorization &&
-		req.headers.authorization.startsWith('Bearer')
-	)
-		token = req.headers.authorization.split(' ')[1];
-	else if (!req.headers.authorization && req.cookies.jwt)
-		token = req.cookies.jwt;
-	else
-		return req.status(400).json({
+	if (!req.headers.cookie) {
+		return res.status(400).json({
 			status: 'error',
-			message: 'Please, log in to perfom this action.',
+			message: `Please, log in to perfom this action.`,
 		});
+	}
+	const token = req.headers.cookie.replace('jwt=', '');
 
 	const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
@@ -58,11 +41,27 @@ async function protect(req, res, next) {
 	next();
 }
 
-async function verifyUser(req, res) {
-	let token;
+async function logOut(req, res) {
+	const token = undefined;
+	res.cookie('jwt', token, {
+		maxAge: 1,
+		httpOnly: true,
+		secure: true,
+	});
 
-	if (!req.headers.cookie) return;
-	token = req.headers.cookie.replace('jwt=', '');
+	res.status(200).json({
+		status: 'success',
+		message: 'Logged out successfully!',
+		token,
+	});
+}
+
+async function verifyUser(req, res) {
+	if (!req.headers.cookie) {
+		return;
+	}
+
+	const token = req.headers.cookie.replace('jwt=', '');
 	const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 	const user = await User.findById(decoded.userId);
 	if (!user) {
@@ -70,7 +69,6 @@ async function verifyUser(req, res) {
 			.status(400)
 			.json({ status: 'error', message: `The user doesn't exist` });
 	}
-
 	const filteredUser = await getFilteredUser(user.email);
 	return res.status(200).json({
 		status: 'status',
@@ -80,24 +78,22 @@ async function verifyUser(req, res) {
 }
 
 async function sendOTP(req, res) {
-	const { userId } = req;
+	const { userId, type, language } = req;
 	const newOTP = otpGenerator.generate(6, {
 		lowerCaseAlphabets: false,
 		upperCaseAlphabets: false,
 		specialChars: false,
 	});
-
 	const otpExpiryTime = Date.now() + 10 * 60 * 1000; // 10 Mins after otp is sent
 
 	const user = await User.findByIdAndUpdate(userId, {
 		otpExpiryTime,
 	});
-
 	user.otp = newOTP.toString();
 
 	await user.save({ new: true, validateModifiedOnly: true });
 
-	maailer.sendEmailVerificationOTP(user, newOTP);
+	maailer.sendEmailVerificationOTP(user, newOTP, type, language);
 
 	return res.status(200).json({
 		status: 'success',
@@ -105,7 +101,9 @@ async function sendOTP(req, res) {
 	});
 }
 async function verifyOTP(req, res, next) {
+	console.log('leoo');
 	const { email, otp } = req.body;
+	console.log(email, otp);
 	const user = await User.findOne({
 		email,
 		otpExpiryTime: { $gt: Date.now() },
@@ -129,15 +127,23 @@ async function verifyOTP(req, res, next) {
 	await user.save({ new: true, validateModifiedOnly: true });
 
 	const token = signToken(user._id);
-	return res.status(200).json({
-		status: 'success',
-		message: 'OTP Verified successfully, welcome!',
-		token,
-	});
+
+	return res
+		.status(200)
+		.cookie('jwt', token, {
+			maxAge: 24 * 60 * 60 * 1000 * 21, // 3 Weeks
+			httpOnly: true,
+			secure: true,
+		})
+		.json({
+			status: 'success',
+			message: 'OTP Verified successfully, welcome!',
+		});
 }
 
 async function register(req, res, next) {
-	const { email, password, passwordConfirmation, fullName, country } = req.body;
+	const { email, password, passwordConfirmation, fullName, country, language } =
+		req.body;
 
 	if (!email) {
 		return res.status(400).json({
@@ -156,7 +162,7 @@ async function register(req, res, next) {
 	if (!password || !passwordConfirmation) {
 		return res.status(400).json({
 			status: 'error',
-			message: 'Both passowrd and password confirmation are required.',
+			message: 'Both password and password confirmation are required.',
 		});
 	}
 
@@ -164,7 +170,7 @@ async function register(req, res, next) {
 		return res.status(400).json({
 			status: 'error',
 			message:
-				'Both passowrd and password confirmation are required to be the same.',
+				'Both password and password confirmation are required to be the same.',
 		});
 	}
 
@@ -183,6 +189,7 @@ async function register(req, res, next) {
 		await newUser.save();
 
 		req.userId = newUser._id;
+		req.language = language;
 		next();
 	}
 	if (existingUser && existingUser.verified) {
@@ -193,12 +200,12 @@ async function register(req, res, next) {
 	}
 
 	if (existingUser && !existingUser.verified) {
-		await User.findOneAndUpdate({ email }, filteredBody, {
+		const newUser = await User.findOneAndUpdate({ email }, filteredBody, {
 			new: true,
 			validateModifiedOnly: true,
 		});
-
-		req.userId = existingUser._id;
+		req.userId = newUser._id;
+		req.language = language;
 		next();
 	}
 }
@@ -214,7 +221,7 @@ async function login(req, res, next) {
 	}
 
 	const user = await User.findOne({ email });
-	if (!user || (await user.correctPassword(password, user.password))) {
+	if (!user || !(await user.correctPassword(password, user.password))) {
 		return res.status(400).json({
 			status: 'error',
 			message: 'Email or password is incorrect',
@@ -225,7 +232,7 @@ async function login(req, res, next) {
 	const filteredUser = await getFilteredUser(user.email);
 
 	res.cookie('jwt', token, {
-		maxAge: 900000,
+		maxAge: 24 * 60 * 60 * 1000 * 21, // 3 Weeks
 		httpOnly: true,
 		secure: true,
 	});
@@ -238,9 +245,9 @@ async function login(req, res, next) {
 	});
 }
 
-async function forgotPassword() {
+async function forgotPassword(req, res, next) {
 	// Todo
-	const email = req.body.email;
+	const { email, language } = req.body;
 
 	if (!email)
 		return res.status(400).json({
@@ -255,18 +262,14 @@ async function forgotPassword() {
 			message: 'There is no user with given email address.',
 		});
 
-	const resetToken = await user.createPasswordResetToken();
-	const resetURL = `auth/reset-password/?code=${resetToken}`;
 	try {
-		// Todo Send Email with reset url
-
-		return res.status(200).json({
-			status: 'success',
-			message: 'Reset passowrd link sent to email address. ',
-		});
+		req.type = 'password';
+		req.userId = user._id;
+		req.language = language;
+		next();
 	} catch (error) {
-		user.createPasswordResetToken = undefined;
-		user.createPassworExpires = undefined;
+		user.otp = undefined;
+		user.otpExpiryTime = undefined;
 
 		await user.save({ validateBeforeSave: false });
 
@@ -277,36 +280,40 @@ async function forgotPassword() {
 	}
 }
 
-async function resetPassword() {
-	const hashedToken = crypto
-		.createHash('sha256')
-		.update(req.params.token)
-		.digest('hex');
+async function resetPassword(req, res) {
+	const { password, passwordConfirmation, email, otp } = req.body;
 
-	const user = User.findOne({
-		passwordResetToken: hashedToken,
-		passwordResetExpires: { $gt: Date.now() },
+	const user = await User.findOne({
+		email,
+		otpExpiryTime: { $gt: Date.now() },
 	});
-	if (!user)
+
+	if (!user.correctOTP(otp, user.otp))
 		return res.status(400).json({
 			status: 'error',
 			message: 'Reset password token is invalid or expired',
 		});
 	else {
 		user.password = req.body.password;
-		user.passwordConfirmation = req.body.passwordConfirmation;
 
-		user.createPasswordResetToken = undefined;
-		user.createPassworExpires = undefined;
-
+		user.otp = undefined;
+		user.otpExpiryTime = undefined;
 		await user.save();
 
 		const token = signToken(user._id);
-		// Todo send email informin password change
+
+		const filteredUser = await getFilteredUser(user.email);
+
+		res.cookie('jwt', token, {
+			maxAge: 24 * 60 * 60 * 1000 * 21, // 3 Weeks
+			httpOnly: true,
+			secure: true,
+		});
+
 		return res.status(200).json({
 			status: 'success',
 			message: 'New password saved successfully, welcome!',
-			token,
+			user: filteredUser,
 		});
 	}
 }
@@ -320,4 +327,5 @@ module.exports = {
 	login,
 	protect,
 	verifyUser,
+	logOut,
 };

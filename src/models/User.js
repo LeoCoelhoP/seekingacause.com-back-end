@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const userSchema = new mongoose.Schema({
 	avatar: {
 		type: String,
+		default:
+			'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
 	},
 	fullName: { type: String, required: true },
 	email: {
@@ -28,8 +30,7 @@ const userSchema = new mongoose.Schema({
 	},
 	phoneNumber: { type: String },
 	showPhoneNumber: { type: Boolean },
-	totalDonated: { type: Number, default: 0 },
-	adsDonated: { type: Number, default: 0 },
+	donations: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Donation' }],
 	level: { type: Number, default: 0 },
 	likes: [{ type: mongoose.Schema.Types.ObjectId }],
 	passwordChangedAt: {
@@ -84,6 +85,7 @@ userSchema.methods.correctPassword = async function (
 };
 
 userSchema.methods.correctOTP = async function (candidateOTP, userOTP) {
+	if (!candidateOTP || !userOTP) return false;
 	return await bcrypt.compare(candidateOTP, userOTP);
 };
 
@@ -113,5 +115,4 @@ userSchema.methods.createPasswordResetToken = function () {
 	return resetToken;
 };
 
-const User = new mongoose.model('User', userSchema);
-module.exports = User;
+module.exports = new mongoose.model('User', userSchema);
