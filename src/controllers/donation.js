@@ -5,17 +5,18 @@ const getFilteredUser = require('../utils/getFilteredUser');
 
 async function createDonation(req, res, next) {
 	const { user, ngoId, type } = req.body;
+
 	const donation = await new Donation({
-		user: user._id || null,
+		user: user?._id || undefined,
 		ngo: ngoId,
 		type,
 	});
 
 	const userDocument = user && (await User.findById(user._id));
-	if (userDocument && userDocument.donations)
+	if (userDocument && userDocument?.donations)
 		userDocument.donations = [...userDocument.donations, donation];
 
-	if (!userDocument.donations && userDocument)
+	if (!userDocument?.donations && userDocument)
 		userDocument.donations = [donation];
 
 	if (userDocument) {
@@ -29,7 +30,7 @@ async function createDonation(req, res, next) {
 		$push: { donations: donation },
 	});
 
-	const filteredUser = await getFilteredUser(userDocument.email);
+	const filteredUser = user && (await getFilteredUser(userDocument.email));
 	const ngos = await Ngo.find().populate('donations');
 	res.status(200).json({
 		status: 'Success',

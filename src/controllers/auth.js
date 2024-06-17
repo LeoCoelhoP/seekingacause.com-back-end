@@ -101,9 +101,7 @@ async function sendOTP(req, res) {
 	});
 }
 async function verifyOTP(req, res, next) {
-	console.log('leoo');
 	const { email, otp } = req.body;
-	console.log(email, otp);
 	const user = await User.findOne({
 		email,
 		otpExpiryTime: { $gt: Date.now() },
@@ -127,7 +125,7 @@ async function verifyOTP(req, res, next) {
 	await user.save({ new: true, validateModifiedOnly: true });
 
 	const token = signToken(user._id);
-
+	const filteredUser = await getFilteredUser(user.email);
 	return res
 		.status(200)
 		.cookie('jwt', token, {
@@ -138,6 +136,7 @@ async function verifyOTP(req, res, next) {
 		.json({
 			status: 'success',
 			message: 'OTP Verified successfully, welcome!',
+			user: filteredUser,
 		});
 }
 
@@ -288,7 +287,7 @@ async function resetPassword(req, res) {
 		otpExpiryTime: { $gt: Date.now() },
 	});
 
-	if (!user.correctOTP(otp, user.otp))
+	if (!user && !user?.correctOTP(otp, user.otp))
 		return res.status(400).json({
 			status: 'error',
 			message: 'Reset password token is invalid or expired',

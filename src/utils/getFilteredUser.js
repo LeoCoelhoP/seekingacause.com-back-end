@@ -1,6 +1,6 @@
 const User = require('../models/User');
 async function getFilteredUser(email) {
-	return await User.findOne({ email }, [
+	const user = await User.findOne({ email }, [
 		'avatar',
 		'fullName',
 		'level',
@@ -11,6 +11,8 @@ async function getFilteredUser(email) {
 	])
 		.populate({ path: 'donations' })
 		.exec();
+	console.log(user);
+	return user;
 }
 
 module.exports = getFilteredUser;

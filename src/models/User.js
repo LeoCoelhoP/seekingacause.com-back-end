@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
 	fullName: { type: String, required: true },
 	email: {
 		type: String,
+		unique: true,
 		required: [true, 'Email is required.'],
 		validate: function (email) {
 			return String(email)

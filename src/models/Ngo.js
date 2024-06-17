@@ -7,7 +7,9 @@ const ngoSchema = new mongoose.Schema({
 		required: true,
 	},
 	name: { type: String, required: true },
+	namePT: { type: String, required: true },
 	description: { type: String, required: true },
+	descriptionPT: { type: String, required: true },
 	donations: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Donation' }],
 	monthDonations: { type: Array, default: [] },
 	location: { type: Array, required: true },
@@ -18,6 +20,8 @@ const ngoSchema = new mongoose.Schema({
 	},
 	verified: { type: Boolean, default: false },
 	type: { type: String, required: true },
+	visible: { type: Boolean, default: true },
+	website: { type: String },
 });
 
 module.exports = new mongoose.model('Ngo', ngoSchema);

@@ -4,11 +4,13 @@ const getFilteredUser = require('../utils/getFilteredUser');
 
 async function like(req, res) {
 	const { ngoArray, user } = req.body;
-
-	if (!ngoArray)
-		return res
-			.status(400)
-			.json({ status: 'error', message: 'Please provide a valid NGO array.' });
+	console.log(ngoArray);
+	console.log(user);
+	if (!ngoArray || !user)
+		return res.status(400).json({
+			status: 'error',
+			message: 'Please provide a valid NGO array or a valid user.',
+		});
 
 	const updatedUser = await User.findByIdAndUpdate(
 		user,
@@ -18,7 +20,6 @@ async function like(req, res) {
 			validateModifiedOnly: true,
 		},
 	);
-	console.log(ngoArray);
 	const filteredUser = await getFilteredUser(updatedUser.email);
 
 	return res.status(200).json({

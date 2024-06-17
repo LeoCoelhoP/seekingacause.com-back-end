@@ -41,10 +41,17 @@ if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 const limiter = rateLimit({
 	max: process.env.RATE_LIMIT || 3000,
 	window: 60 * 60 * 1000,
-	message: 'Too many requests from this IP´, please try again in an hour.',
+	message: 'Too many requests from this IP, please try again in an hour.',
+});
+
+const ngoLimiter = rateLimit({
+	max: process.env.RATE_LIMIT || 3000,
+	window: 60 * 10 * 1000,
+	message: 'Too many requests from this IP, please try again in an hour.',
 });
 
 app.use('/', limiter);
+app.use('/ngo', ngoLimiter);
 
 app.use(routes);
 
