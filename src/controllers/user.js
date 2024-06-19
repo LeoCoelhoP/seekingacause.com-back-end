@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const filterObject = require('../utils/filterObject');
 const getFilteredUser = require('../utils/getFilteredUser');
+const awsService = require('../services/aws');
 
 async function like(req, res) {
 	const { ngoArray, user } = req.body;
@@ -29,6 +30,27 @@ async function like(req, res) {
 	});
 }
 
+async function updateAvatar(req, res, next) {
+	const { user } = req;
+
+	const response = await awsService.updateAvatar(req.file, user?.avatar);
+	const [url, imageName] = response;
+	user.avatar = {
+		url,
+		imageName,
+	};
+	await user.save();
+
+	const filteredUser = await getFilteredUser(user.email);
+	res
+		.status(200)
+		.json({
+			status: 'success',
+			user: filteredUser,
+			message: 'Avatar Successfully Updated!',
+		});
+}
+
 async function updateMe(req, res, next) {
 	const { user } = req;
 
@@ -52,4 +74,4 @@ async function updateMe(req, res, next) {
 	});
 }
 
-module.exports = { updateMe, like };
+module.exports = { updateAvatar, updateMe, like };

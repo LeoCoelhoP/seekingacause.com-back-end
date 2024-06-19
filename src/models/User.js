@@ -1,11 +1,14 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+
 const userSchema = new mongoose.Schema({
 	avatar: {
-		type: String,
-		default:
-			'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
+		type: Object,
+		default: {
+			url: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
+			imageName: null,
+		},
 	},
 	fullName: { type: String, required: true },
 	email: {
@@ -59,14 +62,6 @@ const userSchema = new mongoose.Schema({
 	otpExpiryTime: {
 		type: Date,
 	},
-});
-userSchema.pre('save', async function (next) {
-	// Only run this function if password was actually modified
-	if (!this.isModified('otp') || !this.otp) return next();
-	const hashedOTP = await bcrypt.hashSync(this.otp.toString(), 12);
-	this.otp = hashedOTP;
-
-	next();
 });
 
 userSchema.pre('save', async function (next) {

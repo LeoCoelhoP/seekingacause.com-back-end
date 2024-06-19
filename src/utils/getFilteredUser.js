@@ -11,7 +11,6 @@ async function getFilteredUser(email) {
 	])
 		.populate({ path: 'donations' })
 		.exec();
-	console.log(user);
 	return user;
 }
 
