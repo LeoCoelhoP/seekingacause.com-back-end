@@ -1,17 +1,22 @@
 const router = require('express').Router();
 const authController = require('../controllers/auth');
+const catchAsync = require('../utils/catchAsync');
 
-router.post('/login', authController.login);
-router.post('/register', authController.register, authController.sendOTP);
-router.post('/send-otp', authController.sendOTP);
-router.post('/verify-otp', authController.verifyOTP);
+router.post('/login', catchAsync(authController.login));
+router.post(
+	'/register',
+	catchAsync(authController.register),
+	catchAsync(authController.sendOTP),
+);
+router.post('/send-otp', catchAsync(authController.sendOTP));
+router.post('/verify-otp', catchAsync(authController.verifyOTP));
 router.post(
 	'/forgot-password',
-	authController.forgotPassword,
-	authController.sendOTP,
+	catchAsync(authController.forgotPassword),
+	catchAsync(authController.sendOTP),
 );
-router.post('/reset-password', authController.resetPassword);
-router.post('/verify-user', authController.verifyUser);
-router.post('/log-out', authController.logOut);
+router.post('/reset-password', catchAsync(authController.resetPassword));
+router.post('/verify-user', catchAsync(authController.verifyUser));
+router.post('/log-out', catchAsync(authController.logOut));
 
 module.exports = router;

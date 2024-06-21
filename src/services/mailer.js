@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const sendOTPMessages = require('../constants/sendOTPMessages');
+const sendOTPMessages = require('../configs/emailTemplates/sendOTPMessages');
 const bcrypt = require('bcryptjs');
 
 function createTransporter() {

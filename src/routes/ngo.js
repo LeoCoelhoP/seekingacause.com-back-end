@@ -1,9 +1,10 @@
 const router = require('express').Router();
 const ngoController = require('../controllers/ngo');
+const catchAsync = require('../utils/catchAsync');
 
-router.get('/', ngoController.getAllNgos);
-router.post('/create', ngoController.createNgo);
-router.delete('/delete', ngoController.deleteNgo);
-router.patch('/verify', ngoController.verifyNgo);
+router.get('/', catchAsync(ngoController.getAllNgos));
+router.post('/create', catchAsync(ngoController.createNgo));
+router.delete('/delete', catchAsync(ngoController.deleteNgo));
+router.patch('/verify', catchAsync(ngoController.verifyNgo));
 
 module.exports = router;

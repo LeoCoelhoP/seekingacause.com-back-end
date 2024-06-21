@@ -1,77 +1,122 @@
 const User = require('../models/User');
+const awsService = require('../services/aws');
 const filterObject = require('../utils/filterObject');
 const getFilteredUser = require('../utils/getFilteredUser');
-const awsService = require('../services/aws');
+const {
+	userControllerErrors,
+} = require('../configs/messages/en/errorMessages');
+const {
+	userControllerSuccesses,
+} = require('../configs/messages/en/successMessages');
+
+const {
+	userControllerErrorsPT,
+} = require('../configs/messages/pt/errorMessages');
+const {
+	userControllerSuccessesPT,
+} = require('../configs/messages/pt/successMessages');
+
+function getErrorMessage(errorType, defaultLanguage) {
+	return defaultLanguage
+		? userControllerErrors[errorType]
+		: userControllerErrorsPT[errorType];
+}
+
+function getSuccessMessage(successType, defaultLanguage) {
+	return defaultLanguage
+		? userControllerSuccesses[successType]
+		: userControllerSuccessesPT[successType];
+}
 
 async function like(req, res) {
-	const { ngoArray, user } = req.body;
-	console.log(ngoArray);
-	console.log(user);
-	if (!ngoArray || !user)
-		return res.status(400).json({
-			status: 'error',
-			message: 'Please provide a valid NGO array or a valid user.',
+	try {
+		const { ngoArray } = req.body;
+		const { user } = req;
+		if (!ngoArray || !Array.isArray(ngoArray))
+			return res.status(400).json({
+				status: 'error',
+				message: getErrorMessage('noNgo', req.defaultLanguage),
+			});
+
+		const updatedUser = await User.findByIdAndUpdate(
+			user._id,
+			{ likes: ngoArray },
+			{
+				new: true,
+				validateModifiedOnly: true,
+			},
+		);
+
+		const filteredUser = await getFilteredUser({ email: updatedUser.email });
+
+		return res.status(200).json({
+			status: 'success',
+			message: getSuccessMessage('like', req.defaultLanguage),
+
+			user: filteredUser,
 		});
-
-	const updatedUser = await User.findByIdAndUpdate(
-		user,
-		{ likes: ngoArray },
-		{
-			new: true,
-			validateModifiedOnly: true,
-		},
-	);
-	const filteredUser = await getFilteredUser(updatedUser.email);
-
-	return res.status(200).json({
-		status: 'success',
-		message: 'Likes successfully updated',
-		user: filteredUser,
-	});
+	} catch (err) {
+		throw new Error(getErrorMessage('like', req.defaultLanguage));
+	}
 }
 
 async function updateAvatar(req, res, next) {
-	const { user } = req;
+	try {
+		const { user } = req;
 
-	const response = await awsService.updateAvatar(req.file, user?.avatar);
-	const [url, imageName] = response;
-	user.avatar = {
-		url,
-		imageName,
-	};
-	await user.save();
+		if (!req.file) {
+			return res.status(400).json({
+				status: 'error',
+				message: getErrorMessage('noImage', req.defaultLanguage),
+			});
+		}
 
-	const filteredUser = await getFilteredUser(user.email);
-	res
-		.status(200)
-		.json({
+		const [url, imageName] = await awsService.updateAvatar(
+			req.file,
+			user?.avatar,
+		);
+
+		user.avatar = {
+			url,
+			imageName,
+		};
+		await user.save();
+
+		const filteredUser = await getFilteredUser({ email: user.email });
+		res.status(200).json({
 			status: 'success',
 			user: filteredUser,
-			message: 'Avatar Successfully Updated!',
+			message: getSuccessMessage('updateAvatar', req.defaultLanguage),
 		});
+	} catch {
+		throw new Error(getErrorMessage('updateAvatar', req.defaultLanguage));
+	}
 }
 
 async function updateMe(req, res, next) {
-	const { user } = req;
+	try {
+		const { user } = req;
 
-	const filteredBody = filterObject(
-		req.body,
-		'avatar',
-		'fullName',
-		'country',
-		'phoneNumber',
-	);
+		const filteredBody = filterObject(
+			req.body,
+			'fullName',
+			'country',
+			'phoneNumber',
+		);
 
-	const updatedUser = await User.findByIdAndUpdate(user._id, filteredBody, {
-		new: true,
-		validateModifiedOnly: true,
-	});
+		const updatedUser = await User.findByIdAndUpdate(user._id, filteredBody, {
+			new: true,
+			validateModifiedOnly: true,
+		});
 
-	res.status(200).json({
-		status: 'success',
-		message: 'Profile updated successfully!',
-		data: updatedUser,
-	});
+		res.status(200).json({
+			status: 'success',
+			message: getSuccessMessage('updateMe', req.defaultLanguage),
+			data: updatedUser,
+		});
+	} catch {
+		throw new Error(getErrorMessage('updateMe', req.defaultLanguage));
+	}
 }
 
 module.exports = { updateAvatar, updateMe, like };

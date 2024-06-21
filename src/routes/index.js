@@ -4,6 +4,7 @@ const userRoute = require('./user');
 const ngoRoute = require('./ngo');
 const donationRoute = require('./donation');
 const paymentsRoute = require('./payment');
+const catchAsync = require('../utils/catchAsync');
 
 router.use('/auth', authRoute);
 router.use('/user', userRoute);

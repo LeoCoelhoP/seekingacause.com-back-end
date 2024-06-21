@@ -14,6 +14,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const routes = require('./routes/index');
+const { translator } = require('./utils/translator');
 
 const app = express();
 app.use(
@@ -50,8 +51,8 @@ const ngoLimiter = rateLimit({
 	message: 'Too many requests from this IP, please try again in an hour.',
 });
 
-app.use('/', limiter);
-app.use('/ngo', ngoLimiter);
+app.use('/', translator, limiter);
+app.use('/ngo', translator, ngoLimiter);
 
 app.use(routes);
 

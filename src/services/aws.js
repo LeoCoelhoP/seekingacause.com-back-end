@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const sharp = require('sharp');
 const dotenv = require('dotenv').config();
-const User = require('../models/User');
 
 const {
 	S3Client,
@@ -72,4 +71,15 @@ async function updateAvatar(file, oldAvatar) {
 	}
 }
 
-module.exports = { updateAvatar };
+async function updateAvatarUrl(imageName) {
+	const getObjectParams = {
+		Bucket: awsBucketName,
+		Key: imageName,
+	};
+
+	const getUrlCommand = new GetObjectCommand(getObjectParams);
+	const url = await getSignedUrl(s3, getUrlCommand);
+	return [url, imageName];
+}
+
+module.exports = { updateAvatar, updateAvatarUrl };

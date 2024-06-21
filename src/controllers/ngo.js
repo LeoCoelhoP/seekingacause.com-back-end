@@ -1,77 +1,117 @@
 const Ngo = require('../models/Ngo');
 const filterObject = require('../utils/filterObject');
+const {
+	ngoControllerSuccesses,
+} = require('../configs/messages/en/successMessages');
+const {
+	ngoControllerSuccessesPT,
+} = require('../configs/messages/pt/successMessages');
+const { ngoControllerErrors } = require('../configs/messages/en/errorMessages');
+const {
+	ngoControllerErrorsPT,
+} = require('../configs/messages/pt/errorMessages');
+
+function getErrorMessage(errorType, defaultLanguage) {
+	return defaultLanguage
+		? ngoControllerErrors[errorType]
+		: ngoControllerErrorsPT[errorType];
+}
+
+function getSuccessMessage(successType, defaultLanguage) {
+	return defaultLanguage
+		? ngoControllerSuccesses[successType]
+		: ngoControllerSuccessesPT[successType];
+}
+
+function verifySecret(secret, expectedSecret, res, defaultLanguage) {
+	if (!secret || secret !== expectedSecret) {
+		res.status(401).json({
+			status: 'error',
+			message: getErrorMessage('invalidSecret', defaultLanguage),
+		});
+		return false;
+	}
+	return true;
+}
 
 async function verifyNgo(req, res, next) {
-	const { secret, id } = req.body;
-	if (!secret || secret !== process.env.NGO_SECRET_VERIFY)
-		return res.status(401).json({
-			status: 'error',
-			message: 'Please provide a valid secret.',
-		});
+	try {
+		const { secret, id } = req.body;
+		if (
+			!verifySecret(
+				secret,
+				process.env.NGO_SECRET_VERIFY,
+				res,
+				req.defaultLanguage,
+			)
+		)
+			return;
 
-	const ngo = await Ngo.findByIdAndUpdate(id, { verified: true });
-	if (!ngo)
-		return res.status(401).json({
-			status: 'error',
-			message: 'Please provide a valid ngo.',
-		});
-	else
-		return res.status(200).json({
-			status: 'success',
-			message: 'Ngo Verified Successfully.',
-		});
+		const ngo = await Ngo.findByIdAndUpdate(id, { verified: true });
+		if (!ngo)
+			return res.status(401).json({
+				status: 'error',
+				message: getErrorMessage('invalidNgo', req.defaultLanguage),
+			});
+		else
+			return res.status(200).json({
+				status: 'success',
+				message: getSuccessMessage('verifyNgo', req.defaultLanguage),
+			});
+	} catch {
+		throw new Error(getErrorMessage('verifyNgo', req.defaultLanguage));
+	}
 }
 async function deleteNgo(req, res, next) {
-	const { secret, id } = req.body;
-	if (!secret || secret !== process.env.NGO_SECRET_DELETE)
-		return res.status(401).json({
-			status: 'error',
-			message: 'Please provide a valid secret.',
-		});
+	try {
+		const { secret, id } = req.body;
+		if (
+			!verifySecret(
+				secret,
+				process.env.NGO_SECRET_DELETE,
+				res,
+				req.defaultLanguage,
+			)
+		)
+			return;
 
-	const ngo = await Ngo.findByIdAndDelete(id);
-	if (!ngo)
-		return res.status(401).json({
-			status: 'error',
-			message: 'Please provide a valid ngo.',
-		});
-	else
-		return res.status(200).json({
-			status: 'success',
-			message: 'Ngo deleted Successfully.',
-		});
+		const ngo = await Ngo.findByIdAndDelete(id);
+		if (!ngo)
+			return res.status(401).json({
+				status: 'error',
+				message: getErrorMessage('invalidNgo', req.defaultLanguage),
+			});
+		else
+			return res.status(200).json({
+				status: 'success',
+				message: getSuccessMessage('deleteNgo', req.defaultLanguage),
+			});
+	} catch {
+		throw new Error(getErrorMessage('deleteNgo', req.defaultLanguage));
+	}
 }
 async function createNgo(req, res, next) {
 	try {
-		const {
-			secret,
-			images,
-			name,
-			namePT,
-			location,
-		} = req.body;
-		if (!secret || secret !== process.env.NGO_SECRET)
-			return res.status(401).json({
-				status: 'error',
-				message: 'Please provide a valid secret.',
-			});
+		const { secret, images, name, namePT, location } = req.body;
+		if (!verifySecret(secret, process.env.NGO_SECRET, res, req.defaultLanguage))
+			return;
 
 		if (!images)
 			return res.status(401).json({
 				status: 'error',
-				message: 'Please provide a valid image.',
+				message: getErrorMessage('noImage', req.defaultLanguage),
 			});
 
 		if (!name || !namePT)
 			return res.status(401).json({
 				status: 'error',
-				message: 'Please provide a valid name.',
+				message: getErrorMessage('noName', req.defaultLanguage),
 			});
 
 		if (!location)
 			return res.status(401).json({
 				status: 'error',
-				message: 'Please provide a valid location.',
+				message: getErrorMessage('noLocation', req.defaultLanguage),
 			});
 
 		const existingNgo = await Ngo.findOne({ name: req.body.name });
@@ -93,28 +133,34 @@ async function createNgo(req, res, next) {
 
 			return res.status(200).json({
 				status: 'success',
-				message: 'Ngo create successfully, please verify it.',
+				message: getSuccessMessage('createNgo', req.defaultLanguage),
 				data: newNgo,
 			});
 		}
 		if (existingNgo && existingNgo.verified) {
 			return res.status(400).json({
 				status: 'error',
-				message: 'Sorry, this email address has already been taken.',
+				message: getErrorMessage('nameTaken', req.defaultLanguage),
 			});
 		}
 	} catch (err) {
-		console.log(err);
-		return res.status(500).json({ status: 'error', message: err.message });
+		throw new Error(getErrorMessage('createNgo', req.defaultLanguage));
 	}
 }
 
 async function getAllNgos(req, res, next) {
-	const ngos = await Ngo.find({ verified: true }).populate('donations').exec();
-	return res.status(200).json({
-		status: 'success',
-		message: 'Ngos fetched succesfully!',
-		ngos,
-	});
+	try {
+		const ngos = await Ngo.find({ verified: true })
+			.populate('donations')
+			.exec();
+		return res.status(200).json({
+			status: 'success',
+			message: getSuccessMessage('getAllNgos', req.defaultLanguage),
+
+			ngos,
+		});
+	} catch {
+		throw new Error(getErrorMessage('getAllNgos', req.defaultLanguage));
+	}
 }
 module.exports = { createNgo, getAllNgos, verifyNgo, deleteNgo };
