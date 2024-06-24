@@ -21,6 +21,10 @@ const paymentControllerSuccesses = {
 		'Donated Successfully! Thank you for making a difference in the world!',
 };
 
+const phoneNumberControllerSuccesses = {
+	savePhoneNumber: 'Phone number saved successfully!',
+};
+
 const userControllerSuccesses = {
 	like: 'Likes successfully updated!',
 	updateAvatar: 'Avatar Successfully Updated!',
@@ -31,5 +35,6 @@ module.exports = {
 	donationControllerSuccesses,
 	ngoControllerSuccesses,
 	paymentControllerSuccesses,
+	phoneNumberControllerSuccesses,
 	userControllerSuccesses,
 };

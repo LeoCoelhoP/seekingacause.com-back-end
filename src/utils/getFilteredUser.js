@@ -11,6 +11,7 @@ async function getFilteredUser({ email = null, _id }) {
 			'phoneNumber',
 		])
 			.populate({ path: 'donations' })
+			.populate({ path: 'phoneNumber' })
 			.exec();
 		return user;
 	}
@@ -25,6 +26,7 @@ async function getFilteredUser({ email = null, _id }) {
 			'phoneNumber',
 		])
 			.populate({ path: 'donations' })
+			.populate({ path: 'phoneNumber' })
 			.exec();
 		return user;
 	}

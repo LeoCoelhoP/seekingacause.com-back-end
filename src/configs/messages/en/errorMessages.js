@@ -57,6 +57,12 @@ const paymentControllerErrors = {
 		'Sorry... An error occurred while creating order, please try again.',
 };
 
+const phoneNumberControllerErrors = {
+	invalidPhoneNumber: 'Please provide a valid phone number.',
+	savePhoneNumber:
+		'Sorry... An error occurred while saving phone number, please try again.',
+};
+
 const userControllerErrors = {
 	like: 'Sorry... An error occured while liking, please try again.',
 	noImage: 'Please provide an image file.',
@@ -66,11 +72,13 @@ const userControllerErrors = {
 	updateMe:
 		'Sorry... An error occured while updating profile, please try again.',
 };
+
 module.exports = {
 	authControllerErrors,
 	authControllerErrors,
 	donationControllerErrors,
 	ngoControllerErrors,
 	paymentControllerErrors,
+	phoneNumberControllerErrors,
 	userControllerErrors,
 };

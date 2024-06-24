@@ -39,18 +39,18 @@ const donationControllerErrorsPT = {
 		'Desculpe... Um erro ocorreu enquanto criavamos a doação. Por favor, tente novamente.',
 };
 const ngoControllerErrorsPT = {
-  invalidNgo: 'Por favor forneça uma ONG válida.',
+	invalidNgo: 'Por favor forneça uma ONG válida.',
 	invalidSecret: 'Por favor forneça uma senha válida.',
 	noImage: 'Por favor forneça uma imagem.',
 	noName: 'Por favor forneça uma nome.',
 	noLocation: 'Por favor forneça uma localização.',
 	nameTaken: 'Desculpe... Esse nome já esta em uso.',
 	createNgo:
-  'Desculpe... Um erro ocorreu enquanto criavamos esta ONG. Por favor, tente novamente.',
-  deleteNgo:
-  'Desculpe... Um erro ocorreu enquanto deletavamos esta ONG. Por favor, tente novamente.',
+		'Desculpe... Um erro ocorreu enquanto criavamos esta ONG. Por favor, tente novamente.',
+	deleteNgo:
+		'Desculpe... Um erro ocorreu enquanto deletavamos esta ONG. Por favor, tente novamente.',
 	getAllNgos:
-  'Desculpe... Um erro ocorreu enquanto buscavamos todas ONG. Por favor, tente novamente.',
+		'Desculpe... Um erro ocorreu enquanto buscavamos todas ONG. Por favor, tente novamente.',
 	verifyNgo:
 		'Desculpe... Um erro ocorreu enquanto verficavamos esta ONG. Por favor, tente novamente.',
 };
@@ -60,6 +60,12 @@ const paymentControllerErrorsPT = {
 		'Desculpe... Um erro ocorreu enquanto capturavamos seu pedido. Por favor, tente novamente.',
 	createOrder:
 		'Desculpe... Um erro ocorreu enquanto criavamos seu pedido. Por favor, tente novamente.',
+};
+
+const phoneNumberControllerErrorsPT = {
+	invalidPhoneNumber: 'Por favor forneça um número de celular válido.',
+	savePhoneNumber:
+		'Desculpe... Um erro ocorreu enquanto salvavamos seu número. Por favor, tente novamente.',
 };
 
 const userControllerErrorsPT = {
@@ -76,5 +82,6 @@ module.exports = {
 	donationControllerErrorsPT,
 	ngoControllerErrorsPT,
 	paymentControllerErrorsPT,
+	phoneNumberControllerErrorsPT,
 	userControllerErrorsPT,
 };

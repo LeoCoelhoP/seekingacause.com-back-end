@@ -1,5 +1,4 @@
 const dotenv = require('dotenv');
-const donation = require('./donation');
 const Donation = require('../models/Donation');
 const getFilteredUser = require('../utils/getFilteredUser');
 const Ngo = require('../models/Ngo');

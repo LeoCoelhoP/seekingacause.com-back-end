@@ -104,15 +104,17 @@ async function updateMe(req, res, next) {
 			'phoneNumber',
 		);
 
-		const updatedUser = await User.findByIdAndUpdate(user._id, filteredBody, {
+		await User.findByIdAndUpdate(user._id, filteredBody, {
 			new: true,
 			validateModifiedOnly: true,
 		});
 
+		const filteredUser = await getFilteredUser({ email: user.email });
+
 		res.status(200).json({
 			status: 'success',
 			message: getSuccessMessage('updateMe', req.defaultLanguage),
-			data: updatedUser,
+			user: filteredUser,
 		});
 	} catch {
 		throw new Error(getErrorMessage('updateMe', req.defaultLanguage));

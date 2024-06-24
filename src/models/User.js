@@ -32,7 +32,11 @@ const userSchema = new mongoose.Schema({
 	passwordConfirmation: {
 		type: String,
 	},
-	phoneNumber: { type: String },
+	phoneNumber: {
+		type: mongoose.SchemaTypes.ObjectId,
+		ref: 'PhoneNumber',
+		default: null,
+	},
 	showPhoneNumber: { type: Boolean },
 	donations: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Donation' }],
 	level: { type: Number, default: 0 },
