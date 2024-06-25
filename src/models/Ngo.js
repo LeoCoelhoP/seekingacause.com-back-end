@@ -11,7 +11,6 @@ const ngoSchema = new mongoose.Schema({
 	description: { type: String, required: true },
 	descriptionPT: { type: String, required: true },
 	donations: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Donation' }],
-	monthDonations: { type: Array, default: [] },
 	location: { type: Array, required: true },
 	cityAndCountry: { type: String, required: true },
 	reports: { type: Array, default: [] },
@@ -22,6 +21,7 @@ const ngoSchema = new mongoose.Schema({
 	type: { type: String, required: true },
 	visible: { type: Boolean, default: true },
 	website: { type: String },
+	monthlyGoal: { type: Number, default: 100 },
 });
 
 module.exports = new mongoose.model('Ngo', ngoSchema);

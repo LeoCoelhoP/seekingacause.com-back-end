@@ -82,7 +82,7 @@ async function createOrderHelper(cart) {
 		purchase_units: [
 			{
 				amount: {
-					currency_code: currency,
+					currency_code: 'BRL',
 					value: cost,
 				},
 			},
@@ -111,13 +111,19 @@ async function createOrder(req, res) {
 		// use the cart information passed from the front-end to calculate the order amount detals
 		const { jsonResponse, httpStatusCode } = await createOrderHelper(req.body);
 		const { user, cart } = req.body;
-		const donation = new Donation({
+
+		const donation = await new Donation({
+			user: user?._id || undefined,
 			ngo: cart.ngoId,
 			type: 'money',
 			orderID: jsonResponse.id,
 			amount: cart.cost,
-			user: user?.id || undefined,
 		});
+
+		await Ngo.findByIdAndUpdate(cart.ngoId, {
+			$push: { donations: donation },
+		});
+
 		await donation.save();
 		return res.status(httpStatusCode).json(jsonResponse);
 	} catch (error) {
@@ -146,10 +152,13 @@ async function captueOrder(req, res) {
 		const { orderID, user } = req.body;
 		const { jsonResponse, httpStatusCode } = await captureOrderHelper(orderID);
 		const filteredUser = await getFilteredUser({ _id: user._id });
-		const ngos = await Ngo.find();
+
+		const ngos = await Ngo.find({ verified: true })
+			.populate('donations')
+			.exec();
 		res.status(httpStatusCode).json({
 			message: getSuccessMessage('captureOrder', req.defaultLanguage),
-			data: jsonResponse,
+			jsonResponse,
 			user: filteredUser || null,
 			ngos,
 		});

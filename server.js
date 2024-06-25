@@ -6,7 +6,7 @@ dotenv.config();
 
 const http = require('http');
 const server = http.createServer(app);
-
+const telegramBot = require('./src/services/telegramBot');
 const MONGODB_URI = process.env.MONGODB;
 mongoose
 	.connect(MONGODB_URI)

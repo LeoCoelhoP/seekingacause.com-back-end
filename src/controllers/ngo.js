@@ -153,6 +153,7 @@ async function getAllNgos(req, res, next) {
 		const ngos = await Ngo.find({ verified: true })
 			.populate('donations')
 			.exec();
+
 		return res.status(200).json({
 			status: 'success',
 			message: getSuccessMessage('getAllNgos', req.defaultLanguage),

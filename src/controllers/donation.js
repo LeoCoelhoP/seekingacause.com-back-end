@@ -36,6 +36,7 @@ async function createDonation(req, res, next) {
 			ngo: ngoId,
 			type,
 		});
+		await donation.save();
 
 		const userDocument = user && (await User.findById(user._id));
 		if (userDocument) {
@@ -52,14 +53,12 @@ async function createDonation(req, res, next) {
 
 		const filteredUser = user && (await getFilteredUser(userDocument.email));
 		const ngos = await Ngo.find().populate('donations');
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'Success',
 			message: getSuccessMessage('createDonation', req.defaultLanguage),
 			user: filteredUser || null,
 			ngos,
 		});
-
-		return;
 	} catch {
 		throw new Error(getErrorMessage('createDonation', req.defaultLanguage));
 	}

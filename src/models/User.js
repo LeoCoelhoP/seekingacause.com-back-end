@@ -32,12 +32,10 @@ const userSchema = new mongoose.Schema({
 	passwordConfirmation: {
 		type: String,
 	},
-	phoneNumber: {
-		type: mongoose.SchemaTypes.ObjectId,
-		ref: 'PhoneNumber',
+	telegramChatId: {
+		type: String,
 		default: null,
 	},
-	showPhoneNumber: { type: Boolean },
 	donations: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Donation' }],
 	level: { type: Number, default: 0 },
 	likes: [{ type: mongoose.Schema.Types.ObjectId }],
