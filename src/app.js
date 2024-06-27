@@ -16,13 +16,24 @@ app.use(
 	}),
 );
 
-app.use(
+app.options(
+	'*',
 	cors({
 		origin: '*',
 		methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
 		credentials: true,
 	}),
 );
+
+app.use((req, res, next) => {
+	res.header(
+		'Access-Control-Allow-Origin',
+		'https://seekingacause-com.vercel.app',
+	);
+	res.header('Access-Control-Allow-Methods', 'GET, PATCH, POST, DELETE, PUT');
+	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+	next();
+});
 
 app.use(express.json({ limit: '10kb' }));
 app.use(bodyParser.json());
