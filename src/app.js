@@ -10,36 +10,28 @@ const routes = require('./routes/index');
 const { translator } = require('./utils/translator');
 
 const app = express();
+
+const corsOptions = {
+	origin: 'https://seekingacause-com.vercel.app',
+	methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
+	credentials: true,
+	allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors({ corsOptions }));
+
+app.options('*', cors(corsOptions));
+
+app.use(helmet());
+
 app.use(
 	express.urlencoded({
 		extended: true,
 	}),
 );
-
-app.options(
-	'*',
-	cors({
-		origin: '*',
-		methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
-		credentials: true,
-	}),
-);
-
-app.use((req, res, next) => {
-	res.header(
-		'Access-Control-Allow-Origin',
-		'https://seekingacause-com.vercel.app',
-	);
-	res.header('Access-Control-Allow-Methods', 'GET, PATCH, POST, DELETE, PUT');
-	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-	next();
-});
-
 app.use(express.json({ limit: '10kb' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(helmet());
 
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
