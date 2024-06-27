@@ -18,9 +18,10 @@ app.use(
 
 app.use(
 	cors({
-		origin: [process.env.BASE_URL, '*'],
-		methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-		credentials: true,
+		origin: '*',
+		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+		preflightContinue: false,
+		optionsSuccessStatus: 204,
 	}),
 );
 
