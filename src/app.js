@@ -19,9 +19,8 @@ app.use(
 app.use(
 	cors({
 		origin: '*',
-		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-		preflightContinue: false,
-		optionsSuccessStatus: 204,
+		methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
+		credentials: true,
 	}),
 );
 
@@ -48,9 +47,9 @@ const ngoLimiter = rateLimit({
 app.use('/', translator, limiter);
 app.use('/ngo', translator, ngoLimiter);
 
-app.use(routes);
-
 app.use(mongoSanitize());
 app.use(xss());
+
+app.use(routes);
 
 module.exports = app;
