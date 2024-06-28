@@ -12,13 +12,13 @@ const { translator } = require('./utils/translator');
 const app = express();
 
 const corsOptions = {
-	origin: 'https://seekingacause-com.vercel.app',
+	origin: ['https://seekingacause-com.vercel.app', 'http://localhost:5173'],
 	methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
 	credentials: true,
-	allowedHeaders: ['Content-Type', 'Authorization'],
+	optionsSuccessStatus: 200,
 };
 
-app.use(cors({ corsOptions }));
+app.use(cors(corsOptions));
 
 app.use(helmet());
 

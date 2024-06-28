@@ -89,6 +89,7 @@ async function logOut(req, res) {
 }
 
 async function verifyUser(req, res) {
+	console.log(req.headers.cookie);
 	try {
 		if (!req.headers.cookie) {
 			return;
@@ -115,7 +116,7 @@ async function verifyUser(req, res) {
 			message: getSuccessMessage('verifyUser', req.defaultLanguage),
 			user: filteredUser,
 		});
-	} catch {
+	} catch (err) {
 		throw new Error(getErrorMessage('verifyUser', req.defaultLanguage));
 	}
 }
