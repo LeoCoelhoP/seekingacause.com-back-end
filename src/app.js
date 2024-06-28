@@ -21,7 +21,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(helmet());
-app.enable('trust proxy');
+app.set('trust proxy', 1);
 
 app.use(
 	express.urlencoded({
@@ -34,20 +34,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
-const limiter = rateLimit({
-	max: process.env.RATE_LIMIT || 3000,
-	window: 60 * 60 * 1000,
-	message: 'Too many requests from this IP, please try again in an hour.',
-});
+// const limiter = rateLimit({
+// 	max: process.env.RATE_LIMIT || 3000,
+// 	window: 60 * 60 * 1000,
+// 	message: 'Too many requests from this IP, please try again in an hour.',
+// });
 
-const ngoLimiter = rateLimit({
-	max: process.env.RATE_LIMIT || 3000,
-	window: 60 * 10 * 1000,
-	message: 'Too many requests from this IP, please try again in an hour.',
-});
+// const ngoLimiter = rateLimit({
+// 	max: process.env.RATE_LIMIT || 3000,
+// 	window: 60 * 10 * 1000,
+// 	message: 'Too many requests from this IP, please try again in an hour.',
+// });
 
-app.use('/', translator, limiter);
-app.use('/ngo', translator, ngoLimiter);
+// app.use('/', translator, limiter);
+// app.use('/ngo', translator, ngoLimiter);
 
 app.use(mongoSanitize());
 app.use(xss());
