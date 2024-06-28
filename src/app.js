@@ -8,7 +8,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const routes = require('./routes/index');
 const { translator } = require('./utils/translator');
-const telegramBot = require('./src/services/telegramBot');
+const telegramBot = require('./services/telegramBot');
 
 const app = express();
 
