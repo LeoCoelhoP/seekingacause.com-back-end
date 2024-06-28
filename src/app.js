@@ -46,12 +46,9 @@ if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 // 	message: 'Too many requests from this IP, please try again in an hour.',
 // });
 
-// app.use('/', translator, limiter);
-// app.use('/ngo', translator, ngoLimiter);
-
 app.use(mongoSanitize());
 app.use(xss());
 
-app.use(routes);
+app.use('/', translator, routes);
 
 module.exports = app;
