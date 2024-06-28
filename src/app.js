@@ -21,6 +21,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(helmet());
+app.enable('trust proxy');
 
 app.use(
 	express.urlencoded({

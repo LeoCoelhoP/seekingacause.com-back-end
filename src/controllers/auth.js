@@ -89,7 +89,6 @@ async function logOut(req, res) {
 }
 
 async function verifyUser(req, res) {
-	console.log(req.headers.cookie);
 	try {
 		if (!req.headers.cookie) {
 			return;
@@ -104,7 +103,6 @@ async function verifyUser(req, res) {
 				message: getErrorMessage('userNotFound', req.defaultLanguage),
 			});
 		}
-
 		const newAvatarUrl = await updateAvatarUrl(user.avatar.imageName);
 		const [url, imageName] = newAvatarUrl;
 		const newAvatar = { url, imageName };
