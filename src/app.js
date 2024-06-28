@@ -1,6 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
+// const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
@@ -8,6 +8,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const routes = require('./routes/index');
 const { translator } = require('./utils/translator');
+const telegramBot = require('./src/services/telegramBot');
 
 const app = express();
 
@@ -46,8 +47,8 @@ if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 // 	message: 'Too many requests from this IP, please try again in an hour.',
 // });
 
-// app.use(mongoSanitize());
-// app.use(xss());
+app.use(mongoSanitize());
+app.use(xss());
 
 app.use('/', translator, routes);
 
