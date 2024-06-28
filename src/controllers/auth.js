@@ -294,6 +294,8 @@ async function login(req, res) {
 
 		res.cookie('jwt', token, {
 			maxAge: 24 * 60 * 60 * 1000 * 21, // 3 Weeks
+			httpOnly: true,
+			secure: true,
 		});
 
 		res.status(200).json({

@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const routes = require('./routes/index');
 const { translator } = require('./utils/translator');
 const telegramBot = require('./services/telegramBot');
+const session = require('express-session');
 
 const app = express();
 
@@ -23,6 +24,19 @@ app.use(cors(corsOptions));
 
 app.use(helmet());
 app.set('trust proxy', 1);
+
+const sessionConfig = {
+	secret: 'gfviosdjfguj9#@rt*EHFGNEDG',
+	name: 'seekingacause',
+	resave: false,
+	saveUninitialized: false,
+	store: store,
+	cookie: {
+		sameSite: 'strict',
+	},
+};
+
+app.use(session(sessionConfig));
 
 app.use(
 	express.urlencoded({
