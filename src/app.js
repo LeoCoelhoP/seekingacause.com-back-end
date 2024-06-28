@@ -30,7 +30,6 @@ const sessionConfig = {
 	name: 'seekingacause',
 	resave: false,
 	saveUninitialized: false,
-	store: store,
 	cookie: {
 		sameSite: 'strict',
 	},
