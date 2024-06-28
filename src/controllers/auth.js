@@ -115,6 +115,7 @@ async function verifyUser(req, res) {
 			user: filteredUser,
 		});
 	} catch (err) {
+		console.log(err);
 		throw new Error(getErrorMessage('verifyUser', req.defaultLanguage));
 	}
 }
