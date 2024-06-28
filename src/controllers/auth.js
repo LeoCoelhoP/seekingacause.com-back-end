@@ -91,7 +91,10 @@ async function logOut(req, res) {
 async function verifyUser(req, res) {
 	try {
 		if (!req.headers.cookie) {
-			return;
+			return res.status(400).json({
+				status: 'error',
+				message: getErrorMessage('userNotFound', req.defaultLanguage),
+			});
 		}
 
 		const token = req.headers.cookie.replace('jwt=', '');
