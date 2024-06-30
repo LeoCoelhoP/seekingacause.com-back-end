@@ -7,10 +7,22 @@ const xss = require('xss-clean');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const routes = require('./routes/index');
+const passport = require('passport');
+const session = require('express-session');
 const { translator } = require('./utils/translator');
 const telegramBot = require('./services/telegramBot');
-
 const app = express();
+
+app.use(
+	session({
+		secret: process.env.SESSION_SECRET,
+		cookie: { secure: true },
+		resave: true,
+		saveUninitialized: true,
+	}),
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 const corsOptions = {
 	origin: ['https://seekingacause-com.vercel.app', 'http://localhost:5173'],

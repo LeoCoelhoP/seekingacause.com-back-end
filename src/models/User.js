@@ -13,8 +13,6 @@ const userSchema = new mongoose.Schema({
 	fullName: { type: String, required: true },
 	email: {
 		type: String,
-		unique: true,
-		required: [true, 'Email is required.'],
 		validate: function (email) {
 			return String(email)
 				.toLocaleLowerCase()
@@ -27,7 +25,6 @@ const userSchema = new mongoose.Schema({
 	country: { type: String },
 	password: {
 		type: String,
-		required: true,
 	},
 	passwordConfirmation: {
 		type: String,
@@ -36,6 +33,7 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		default: null,
 	},
+	twitterId: { type: String, default: null },
 	donations: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Donation' }],
 	level: { type: Number, default: 0 },
 	likes: [{ type: mongoose.Schema.Types.ObjectId }],

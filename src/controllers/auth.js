@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
-
 const mailer = require('../services/mailer');
 const User = require('../models/User');
 const filterObject = require('../utils/filterObject');
@@ -19,6 +18,10 @@ const {
 const {
 	authControllerErrorsPT,
 } = require('../configs/messages/pt/errorMessages');
+const {
+	getTwitterOAuthToken,
+	getTwitterUser,
+} = require('../utils/twitterLogin');
 
 function getErrorMessage(errorType, defaultLanguage) {
 	return defaultLanguage
@@ -311,6 +314,43 @@ async function login(req, res) {
 	}
 }
 
+async function twitterLogin(req, res, next) {
+	const code = req.query.code;
+
+	const TwitterOAuthToken = await getTwitterOAuthToken(code);
+
+	if (!TwitterOAuthToken) return res.redirect(`${process.env.BASE_URL}auth`);
+
+	const twitterUser = await getTwitterUser(TwitterOAuthToken.access_token);
+
+	if (!twitterUser) return res.redirect(`${process.env.BASE_URL}auth`);
+
+	const user =
+		(await User.findOne({ twitterId: twitterUser.id })) ||
+		(await new User({
+			fullName: twitterUser.name,
+		}));
+
+	await user.save();
+	getFilteredUser({ _id: user._id });
+
+	const token = await signToken(user._id);
+
+	res.cookie('jwt', token, {
+		maxAge: 24 * 60 * 60 * 1000 * 21, // 3 Weeks
+		httpOnly: true,
+		secure: true,
+		sameSite: 'None',
+	});
+
+	res.status(200).json({
+		status: 'success',
+		message: getSuccessMessage('login', req.defaultLanguage),
+		token,
+		user: filteredUser,
+	});
+}
+
 async function forgotPassword(req, res, next) {
 	try {
 		const { email, language } = req.body;
@@ -406,4 +446,5 @@ module.exports = {
 	protect,
 	verifyUser,
 	logOut,
+	twitterLogin,
 };

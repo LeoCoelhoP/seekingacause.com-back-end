@@ -3,6 +3,8 @@ const authController = require('../controllers/auth');
 const catchAsync = require('../utils/catchAsync');
 
 router.post('/login', catchAsync(authController.login));
+router.get('/twitter-login', catchAsync(authController.twitterLogin));
+
 router.post(
 	'/register',
 	catchAsync(authController.register),
