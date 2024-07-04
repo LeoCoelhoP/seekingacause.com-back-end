@@ -629,7 +629,7 @@ function pt(user, otp) {
 																				line-height: 19.6px;
 																				color: #ecf0f1;
 																			"
-																			>[EMAIL]</span
+																			>seekingacause@outlook.com</span
 																		>
 																	</p>
 																</div>
@@ -1435,7 +1435,7 @@ function en(user, otp) {
 																				line-height: 19.6px;
 																				color: #ecf0f1;
 																			"
-																			>[EMAIL]</span
+																			>seekingacause@outlook.com</span
 																		>
 																	</p>
 																</div>

@@ -8,14 +8,12 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.patch('/like', authController.protect, catchAsync(userController.like));
-
 router.patch(
 	'/update-avatar',
 	authController.protect,
 	upload.single('avatar'),
 	catchAsync(userController.updateAvatar),
 );
-
 router.patch(
 	'/update-me',
 	authController.protect,

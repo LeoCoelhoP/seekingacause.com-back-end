@@ -28,23 +28,23 @@ function randomImageName(bytes = 32) {
 }
 
 async function updateAvatar(file, oldAvatar) {
-	const buffer = await sharp(file.buffer)
-		.resize({
-			height: 1280,
-			width: 720,
-			fit: 'cover',
-		})
-		.toBuffer();
-
-	const imageName = randomImageName();
-	const putObjectParams = {
-		Bucket: awsBucketName,
-		Key: imageName,
-		Body: buffer,
-		ContentType: file.mimetype,
-	};
-
 	try {
+		const buffer = await sharp(file.buffer)
+			.resize({
+				height: 1280,
+				width: 720,
+				fit: 'cover',
+			})
+			.toBuffer();
+
+		const imageName = randomImageName();
+		const putObjectParams = {
+			Bucket: awsBucketName,
+			Key: imageName,
+			Body: buffer,
+			ContentType: file.mimetype,
+		};
+
 		if (oldAvatar.imageName) {
 			const deleteParams = {
 				Bucket: awsBucketName,
@@ -67,19 +67,23 @@ async function updateAvatar(file, oldAvatar) {
 		const url = await getSignedUrl(s3, getUrlCommand);
 		return [url, imageName];
 	} catch (error) {
-		console.log(error);
+		console.error(`Error updating avatar: ${error}`);
 	}
 }
 
 async function updateAvatarUrl(imageName) {
-	const getObjectParams = {
-		Bucket: awsBucketName,
-		Key: imageName,
-	};
+	try {
+		const getObjectParams = {
+			Bucket: awsBucketName,
+			Key: imageName,
+		};
 
-	const getUrlCommand = new GetObjectCommand(getObjectParams);
-	const url = await getSignedUrl(s3, getUrlCommand);
-	return [url, imageName];
+		const getUrlCommand = new GetObjectCommand(getObjectParams);
+		const url = await getSignedUrl(s3, getUrlCommand);
+		return [url, imageName];
+	} catch (error) {
+		console.error(`Error generating signed URL: ${error}`);
+	}
 }
 
 module.exports = { updateAvatar, updateAvatarUrl };

@@ -104,18 +104,22 @@ async function verifyUser(req, res) {
 		const token = req.headers.cookie.replace('jwt=', '');
 		const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 		const user = await User.findById(decoded.userId);
+
 		if (!user) {
 			return res.status(400).json({
 				status: 'error',
 				message: getErrorMessage('userNotFound', req.defaultLanguage),
 			});
 		}
-		const newAvatarUrl = await updateAvatarUrl(user.avatar.imageName);
-		const [url, imageName] = newAvatarUrl;
-		const newAvatar = { url, imageName };
+		if (user.avatar.imageName) {
+			const newAvatarUrl = await updateAvatarUrl(user.avatar.imageName);
+			const [url, imageName] = newAvatarUrl;
+			const newAvatar = { url, imageName };
 
-		await User.findByIdAndUpdate(user._id, { avatar: newAvatar });
-		const filteredUser = await getFilteredUser({ email: user.email });
+			await User.findByIdAndUpdate(user._id, { avatar: newAvatar });
+		}
+		const query = user.mail ? { email: user.email } : { _id: user._id };
+		const filteredUser = await getFilteredUser(query);
 		return res.status(200).json({
 			status: 'status',
 			message: getSuccessMessage('verifyUser', req.defaultLanguage),
@@ -203,7 +207,6 @@ async function register(req, res, next) {
 			country,
 			language,
 		} = req.body;
-
 		if (!email) {
 			return res.status(400).json({
 				status: 'error',
@@ -266,7 +269,7 @@ async function register(req, res, next) {
 			req.language = language;
 			next();
 		}
-	} catch {
+	} catch (error) {
 		throw new Error(getErrorMessage('register', req.defaultLanguage));
 	}
 }
@@ -286,6 +289,12 @@ async function login(req, res) {
 		}
 
 		const user = await User.findOne({ email });
+		if (!user.verified)
+			return res.status(400).json({
+				status: 'error',
+				message: getErrorMessage('userNotVerified', req.defaultLanguage),
+			});
+
 		if (!user || !(await user.correctPassword(password, user.password))) {
 			return res.status(400).json({
 				status: 'error',
@@ -314,41 +323,58 @@ async function login(req, res) {
 	}
 }
 
-async function twitterLogin(req, res, next) {
+async function twitterLogin(req, res) {
 	const code = req.query.code;
 
 	const TwitterOAuthToken = await getTwitterOAuthToken(code);
 
 	if (!TwitterOAuthToken) return res.redirect(`${process.env.BASE_URL}auth`);
 
-	const twitterUser = await getTwitterUser(TwitterOAuthToken.access_token);
+	return res.redirect(
+		`${process.env.BASE_URL}auth/?twitter-token=${TwitterOAuthToken.access_token}`,
+	);
+}
 
-	if (!twitterUser) return res.redirect(`${process.env.BASE_URL}auth`);
+async function twitterLoginFinal(req, res) {
+	try {
+		const { twitterToken } = req.body;
+		console.log(twitterToken);
+		if (!twitterToken)
+			return res
+				.status(400)
+				.json({ status: 'Error', message: 'Invalid Token' });
+		const twitterUser = await getTwitterUser(twitterToken);
 
-	const user =
-		(await User.findOne({ twitterId: twitterUser.id })) ||
-		(await new User({
-			fullName: twitterUser.name,
-		}));
+		if (!twitterUser) return res.redirect(`${process.env.BASE_URL}auth`);
 
-	await user.save();
-	getFilteredUser({ _id: user._id });
+		const user =
+			(await User.findOne({ twitterId: twitterUser.id })) ||
+			(await new User({
+				fullName: twitterUser.name,
+				twitterId: twitterUser.id,
+				country: 'BR',
+			}));
 
-	const token = await signToken(user._id);
+		await user.save();
+		const filteredUser = await getFilteredUser({ _id: user._id });
 
-	res.cookie('jwt', token, {
-		maxAge: 24 * 60 * 60 * 1000 * 21, // 3 Weeks
-		httpOnly: true,
-		secure: true,
-		sameSite: 'None',
-	});
+		const token = await signToken(user._id);
+		res.cookie('jwt', token, {
+			maxAge: 24 * 60 * 60 * 1000 * 21, // 3 Weeks
+			httpOnly: true,
+			secure: true,
+			sameSite: 'None',
+		});
 
-	res.status(200).json({
-		status: 'success',
-		message: getSuccessMessage('login', req.defaultLanguage),
-		token,
-		user: filteredUser,
-	});
+		res.status(200).json({
+			status: 'success',
+			message: getSuccessMessage('login', req.defaultLanguage),
+			token,
+			user: filteredUser,
+		});
+	} catch (error) {
+		console.error(error);
+	}
 }
 
 async function forgotPassword(req, res, next) {
@@ -447,4 +473,5 @@ module.exports = {
 	verifyUser,
 	logOut,
 	twitterLogin,
+	twitterLoginFinal,
 };

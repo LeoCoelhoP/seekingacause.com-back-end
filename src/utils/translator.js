@@ -1,8 +1,8 @@
 function translator(req, res, next) {
 	if (req.headers.language) {
-		req.defaultLanguage = req.headers.language === 'US' ? true : false;
-	} else req.defaultLanguage = req.headers.language === 'US';
+		req.defaultLanguage = req.headers.language === 'US';
+	} else req.defaultLanguage = false;
 	next();
 }
 
-module.exports = { translator };
+module.exports = translator;

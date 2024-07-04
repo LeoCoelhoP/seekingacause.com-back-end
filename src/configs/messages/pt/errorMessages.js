@@ -1,5 +1,6 @@
 const authControllerErrorsPT = {
 	notLoggedIn: 'Por favor, conecte-se para performar essa ação.',
+	userNotVerified: 'Por favor, verifique seu email antes de conectar-se.',
 	userNotFound: 'Usuário não encontrado',
 	invalidOTP: 'Email ou Código de segurança inválido.',
 	nameAndCountryRequired: 'Ambos nome e país são obrigatórios.',

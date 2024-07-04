@@ -37,21 +37,6 @@ const userSchema = new mongoose.Schema({
 	donations: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Donation' }],
 	level: { type: Number, default: 0 },
 	likes: [{ type: mongoose.Schema.Types.ObjectId }],
-	passwordChangedAt: {
-		type: Date,
-	},
-	passwordResetToken: {
-		type: String,
-	},
-	passwordResetExpires: {
-		type: Date,
-	},
-	createdAt: {
-		type: Date,
-	},
-	updatedAt: {
-		type: Date,
-	},
 	verified: {
 		type: Boolean,
 		default: false,
@@ -67,7 +52,6 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function (next) {
 	// Only run this function if password was actually modified
 	if (!this.isModified('password') || !this.password) return next();
-	// Hash the password with cost of 12
 	const hashedPassword = await bcrypt.hash(this.password, 12);
 	this.password = hashedPassword;
 	next();
@@ -94,7 +78,6 @@ userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
 		return JWTTimeStamp < changedTimeStamp;
 	}
 
-	// FALSE MEANS NOT CHANGED
 	return false;
 };
 

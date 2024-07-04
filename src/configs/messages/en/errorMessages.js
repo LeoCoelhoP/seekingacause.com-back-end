@@ -1,5 +1,6 @@
 const authControllerErrors = {
 	notLoggedIn: 'Please, log in to perfom this action.',
+  userNotVerified: "Please, verify your email before logging in.",
 	userNotFound: 'User not found.',
 	invalidOTP: 'Email or OTP Is incorrect.',
 	nameAndCountryRequired: 'Both full name and country are required.',

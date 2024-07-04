@@ -442,7 +442,7 @@ function pt(user, otp) {
 																						data-testid="conversation-turn-3"
 																						data-scroll-anchor="true">
 																						<div
-																							class="py-2 juice:py-[18px] px-3 text-base md:px-4 m-auto md:px-5 lg:px-1 xl:px-5">
+																							class="py-2 juice:py-[18px] px-3 text-base m-auto md:px-5 lg:px-1 xl:px-5">
 																							<div
 																								class="mx-auto flex flex-1 gap-3 text-base juice:gap-4 juice:md:gap-5 juice:lg:gap-6 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem]">
 																								<div
@@ -666,7 +666,7 @@ function pt(user, otp) {
 																							data-testid="conversation-turn-5"
 																							data-scroll-anchor="true">
 																							<div
-																								class="py-2 juice:py-[18px] px-3 text-base md:px-4 m-auto md:px-5 lg:px-1 xl:px-5">
+																								class="py-2 juice:py-[18px] px-3 text-base  m-auto md:px-5 lg:px-1 xl:px-5">
 																								<div
 																									class="mx-auto flex flex-1 gap-3 text-base juice:gap-4 juice:md:gap-5 juice:lg:gap-6 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem]">
 																									<div
@@ -838,7 +838,7 @@ function pt(user, otp) {
 																				line-height: 19.6px;
 																				color: #ecf0f1;
 																			"
-																			>[EMAIL]</span
+																			>seekingacause@outlook.com</span
 																		>
 																	</p>
 																</div>
@@ -1406,7 +1406,7 @@ function en(user, otp) {
 																						data-testid="conversation-turn-3"
 																						data-scroll-anchor="true">
 																						<div
-																							class="py-2 juice:py-[18px] px-3 text-base md:px-4 m-auto md:px-5 lg:px-1 xl:px-5">
+																							class="py-2 juice:py-[18px] px-3 text-base m-auto md:px-5 lg:px-1 xl:px-5">
 																							<div
 																								class="mx-auto flex flex-1 gap-3 text-base juice:gap-4 juice:md:gap-5 juice:lg:gap-6 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem]">
 																								<div
@@ -1622,7 +1622,7 @@ function en(user, otp) {
 																							data-testid="conversation-turn-5"
 																							data-scroll-anchor="true">
 																							<div
-																								class="py-2 juice:py-[18px] px-3 text-base md:px-4 m-auto md:px-5 lg:px-1 xl:px-5">
+																								class="py-2 juice:py-[18px] px-3 text-base m-auto md:px-5 lg:px-1 xl:px-5">
 																								<div
 																									class="mx-auto flex flex-1 gap-3 text-base juice:gap-4 juice:md:gap-5 juice:lg:gap-6 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem]">
 																									<div
@@ -1790,7 +1790,7 @@ function en(user, otp) {
 																				line-height: 19.6px;
 																				color: #ecf0f1;
 																			"
-																			>[EMAIL]</span
+																			>seekingacause@outlook.com</span
 																		>
 																	</p>
 																</div>

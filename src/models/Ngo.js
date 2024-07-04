@@ -14,9 +14,6 @@ const ngoSchema = new mongoose.Schema({
 	location: { type: Array, required: true },
 	cityAndCountry: { type: String, required: true },
 	reports: { type: Array, default: [] },
-	createdAt: {
-		type: Date,
-	},
 	verified: { type: Boolean, default: false },
 	type: { type: String, required: true },
 	visible: { type: Boolean, default: true },

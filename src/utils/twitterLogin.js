@@ -1,9 +1,10 @@
 const axios = require('axios');
 
-const TWITTER_CLIENT_ID = process.env.TWITTER_CLIENT_ID;
-const TWITTER_CLIENT_SECRET = process.env.TWITTER_CLIENT_SECRET;
+const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET, TWITTER_CODE_CHALLANGE } =
+	process.env;
+
 const TWITTER_OAUTH_TOKEN_URL = 'https://api.twitter.com/2/oauth2/token';
-const TWITTER_CODE_CHALLANGE = process.env.TWITTER_CODE_CHALLANGE;
+const TWITTER_REDIRECT_URI = 'http://www.localhost/auth/twitter-login';
 
 const BasicAuthToken = Buffer.from(
 	`${TWITTER_CLIENT_ID}:${TWITTER_CLIENT_SECRET}`,
@@ -13,13 +14,13 @@ const BasicAuthToken = Buffer.from(
 const twitterOauthTokenParams = {
 	client_id: TWITTER_CLIENT_ID,
 	code_verifier: TWITTER_CODE_CHALLANGE,
-	redirect_uri: `http://www.localhost/auth/twitter-login`,
+	redirect_uri: TWITTER_REDIRECT_URI,
 	grant_type: 'authorization_code',
 };
 
 async function getTwitterOAuthToken(code) {
 	try {
-		const res = await axios.post(
+		const response = await axios.post(
 			TWITTER_OAUTH_TOKEN_URL,
 			new URLSearchParams({ ...twitterOauthTokenParams, code }).toString(),
 			{
@@ -30,31 +31,30 @@ async function getTwitterOAuthToken(code) {
 			},
 		);
 
-		return res.data;
-	} catch (err) {
-		console.error(err);
-
+		return response.data;
+	} catch (error) {
+		console.error(`Error fetching Twitter OAuth token: ${error.message}`);
 		return null;
 	}
 }
 
 async function getTwitterUser(accessToken) {
 	try {
-		const res = await axios.get('https://api.twitter.com/2/users/me', {
+		const response = await axios.get('https://api.twitter.com/2/users/me', {
 			headers: {
 				'Content-type': 'application/json',
 				Authorization: `Bearer ${accessToken}`,
 			},
 		});
 
-		return res.data.data ?? null;
-	} catch (err) {
-		console.error(err);
+		return response.data.data ?? null;
+	} catch (error) {
+		console.error(`Error fetching Twitter user data: ${error.message}`);
 		return null;
 	}
 }
+
 module.exports = {
 	getTwitterOAuthToken,
 	getTwitterUser,
-	twitterOauthTokenParams,
 };

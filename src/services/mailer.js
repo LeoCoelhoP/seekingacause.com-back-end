@@ -3,6 +3,15 @@ const sendOTPMessages = require('../configs/emailTemplates/sendOTPMessages');
 const bcrypt = require('bcryptjs');
 
 function createTransporter() {
+	if (
+		!process.env.EMAIL_SERVICE ||
+		!process.env.EMAIL ||
+		!process.env.EMAIL_PASSWORD
+	)
+		throw new Error(
+			'Email service credentials are not properly set in environment variables',
+		);
+
 	const transporter = nodemailer.createTransport({
 		service: process.env.EMAIL_SERVICE,
 		auth: {
@@ -13,27 +22,31 @@ function createTransporter() {
 	return transporter;
 }
 
+function getSubject(type, language) {
+	const subjects = {
+		verification: {
+			en: sendOTPMessages.mailVerificationSubject,
+			pt: sendOTPMessages.mailVerificationSubjectPT,
+		},
+		password: {
+			en: sendOTPMessages.mailRecoverSubject,
+			pt: sendOTPMessages.mailRecoverSubjectPT,
+		},
+	};
+	return subjects[type] && subjects[type][language];
+}
+
 async function sendEmailVerificationOTP(
 	user,
 	otp,
 	type = 'verification',
 	language = 'pt',
 ) {
-
 	try {
-		console.log(language);
-		let subject = null;
-		if (type === 'verification' && language === 'en')
-			subject = sendOTPMessages.mailVerificationSubject;
-
-		if (type === 'verification' && language === 'pt')
-			subject = sendOTPMessages.mailVerificationSubjectPT;
-
-		if (type === 'password' && language === 'en')
-			subject = sendOTPMessages.mailRecoverSubject;
-
-		if (type === 'password' && language === 'pt')
-			subject = sendOTPMessages.mailRecoverSubjectPT;
+		const subject = getSubject(type, language);
+		if (!subject) {
+			throw new Error('Invalid type or language specified for email subject');
+		}
 
 		const transporter = createTransporter();
 		const mailOptions = {
@@ -43,11 +56,10 @@ async function sendEmailVerificationOTP(
 			html: sendOTPMessages.html(user, otp, type, language),
 		};
 
-		transporter.sendMail(mailOptions, (error, info) => {
-			if (error) return console.error(error);
-		});
+		const info = await transporter.sendMail(mailOptions);
+		console.log('Email sent: ' + info.response);
 	} catch (error) {
-		console.error(error);
+		console.error('Error sending email:', error);
 	}
 }
 

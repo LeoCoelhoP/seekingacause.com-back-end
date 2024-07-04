@@ -47,8 +47,8 @@ async function like(req, res) {
 			},
 		);
 
-		const filteredUser = await getFilteredUser({ email: updatedUser.email });
-
+		const filteredUser = await getFilteredUser({ _id: updatedUser._id });
+		console.log(filteredUser);
 		return res.status(200).json({
 			status: 'success',
 			message: getSuccessMessage('like', req.defaultLanguage),

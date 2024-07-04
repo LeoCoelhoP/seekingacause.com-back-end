@@ -1,7 +1,9 @@
 const User = require('../models/User');
+
 async function getFilteredUser({ email = null, _id }) {
-	if (email) {
-		const user = await User.findOne({ email }, [
+	const query = email ? { email } : { _id };
+	try {
+		const user = await User.findOne(query, [
 			'avatar',
 			'fullName',
 			'level',
@@ -12,19 +14,8 @@ async function getFilteredUser({ email = null, _id }) {
 			.populate({ path: 'donations' })
 			.exec();
 		return user;
-	}
-	if (_id) {
-		const user = await User.findById({ _id }, [
-			'avatar',
-			'fullName',
-			'level',
-			'likes',
-			'donations',
-			'country',
-		])
-			.populate({ path: 'donations' })
-			.exec();
-		return user;
+	} catch (error) {
+		console.error('Error fetching user:', error);
 	}
 }
 
