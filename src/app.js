@@ -14,7 +14,7 @@ const translator = require('./utils/translator');
 const app = express();
 
 const corsOptions = {
-  origin: ['https://seekingacause-com.onrender.com/'],
+  origin: ['https://seekingacause-com.onrender.com'],
   methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -48,6 +48,6 @@ app.use(xss());
 
 app.use('/', translator, routes);
 
-telegramBot.initialize();
+// telegramBot.initialize();
 
 module.exports = app;
