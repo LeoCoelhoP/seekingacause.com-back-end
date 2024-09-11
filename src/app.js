@@ -14,10 +14,10 @@ const translator = require('./utils/translator');
 const app = express();
 
 const corsOptions = {
-	origin: ['https://seekingacause-com.vercel.app', 'http://localhost:5173'],
-	methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
-	credentials: true,
-	optionsSuccessStatus: 200,
+  origin: ['https://seekingacause-com.onrender.com/'],
+  methods: ['GET', 'PATCH', 'POST', 'DELETE', 'PUT'],
+  credentials: true,
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -25,9 +25,9 @@ app.use(helmet());
 app.set('trust proxy', 1);
 
 app.use(
-	express.urlencoded({
-		extended: true,
-	}),
+  express.urlencoded({
+    extended: true,
+  })
 );
 app.use(express.json({ limit: '10kb' }));
 app.use(bodyParser.json());
@@ -36,9 +36,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 const rateLimiter = rateLimit({
-	max: process.env.RATE_LIMIT || 5000,
-	window: 60 * 60 * 1000,
-	message: 'Too many requests from this IP, please try again in an hour.',
+  max: process.env.RATE_LIMIT || 5000,
+  window: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour.',
 });
 
 app.use(rateLimiter);
