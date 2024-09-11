@@ -161,7 +161,7 @@ async function getAllNgos(req, res, next) {
       ngos,
     });
   } catch (error) {
-    console.error(eror);
+    console.error(error);
     throw new Error(getErrorMessage('getAllNgos', req.defaultLanguage));
   }
 }
