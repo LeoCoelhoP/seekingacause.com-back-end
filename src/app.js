@@ -48,6 +48,6 @@ app.use(xss());
 
 app.use('/', translator, routes);
 
-// telegramBot.initialize();
+telegramBot.initialize();
 
 module.exports = app;
